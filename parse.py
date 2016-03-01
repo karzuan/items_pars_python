@@ -47,6 +47,12 @@ def price_int(soup):         # ' 123 000 руб. '
     #s = int(s)            # 123
     return s
 
+def clean_desk(description):
+    sep = 'Похожие товары' # separator
+    #a = "/n/n######*******!!!!!!!!!DESCRIPTION!!!!!!!!!*******#########/n/n"
+    rest = description.split(sep, 1)[0]
+    return rest
+
 
 def parse(html, id):
     # object soup
@@ -61,9 +67,9 @@ def parse(html, id):
     # model, from h1 tag
     model = soup.find('h1', class_="pageHeader good-item-name").text
     # get the item cart: description, characteristics, params
-    #item_card = soup.find('table', class_="good-item-{}".format(id))
+
     description = soup.find_all('p')[0].text
-    #description = explode("похожие товары",description)
+    description = clean_desk(description) # cut text after "Похожие товары"
     characts = soup.find_all('ul')[1].text
     bbt_tech = soup.find('table', class_="bbt tech") #bbt tech params.encode('ascii', 'ignore')
     # [0] - category, [1] - subcat, [2] - type
@@ -74,7 +80,7 @@ def parse(html, id):
             i = i + 1
             all_params.append(col.text)
             if i%2==0:
-                all_params.append(';')
+                all_params.append('/')
     # price
     price = price_int(soup)
     # developer
@@ -110,10 +116,10 @@ def save(items, path):
 
 
 def main():
-    id_start = 129077 # start
+    id_start = 129080 # start
     id = id_start
     items = []
-    while id < 129088:
+    while id < 129090:
         BASE_URL = 'http://videoglaz.ru/good.php?id={}'.format(id)
         try:
             items.extend(parse(get_html(BASE_URL), id))
